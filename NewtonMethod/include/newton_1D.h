@@ -1,6 +1,7 @@
 ﻿#ifndef NEWTON_1D_H
 #define NEWTON_1D_H
 
+#include <stdlib.h>
 
 typedef enum{
     LEFT_DERIVATIVE,
@@ -8,8 +9,17 @@ typedef enum{
     RIGHT_DERIVATIVE
 } DerivType;
 
-double solve_newton_1D(double (*func)(double), const double x0, const double precision,
-    const DerivType der_type, const double der_delta, const uint max_iter, int* status);
+double pure_calc_newton_1D(double (*func)(double), const double x0, const double precision,
+    const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made);
+
+double pure_anal_newton_1D(double (*func)(double), const double x0, const double precision,
+                       double (*deriv)(double), const uint max_iter, uint* iter_made);
+
+double modified_calc_newton_1D(double (*func)(double), const double x0, const double precision,
+                       const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made);
+
+double modified_anal_newton_1D(double (*func)(double), const double x0, const double precision,
+                       double (*deriv)(double), const uint max_iter, uint* iter_made);
 
 
 #endif  //NEWTON_1D_H
