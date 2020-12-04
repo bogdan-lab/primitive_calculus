@@ -1,4 +1,5 @@
-add_library(newton_method SHARED
+﻿add_library(newton_method SHARED
 		newton_1D.c)
 
+target_link_libraries(newton_method PUBLIC m)
 target_include_directories(newton_method PUBLIC ../include)

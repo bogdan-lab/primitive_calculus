@@ -1,6 +1,9 @@
 ﻿#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "newton_1D.h"
+
+//#define NEWTON_VERBOSE
 
 double pure_calc_newton_1D(double (*func)(double), const double x0, const double precision,
    const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made){
@@ -10,7 +13,7 @@ double pure_calc_newton_1D(double (*func)(double), const double x0, const double
     double x = x0;
     double defect = func(x);
     uint idx = 0;
-    while(abs(defect)>precision){
+    while(fabs(defect)>precision){
         double derivative = 0;
         switch (der_type) {
         case LEFT_DERIVATIVE:
@@ -26,14 +29,17 @@ double pure_calc_newton_1D(double (*func)(double), const double x0, const double
             fprintf(stderr, "Incorrect derivative type flag\n");
             exit(EXIT_FAILURE);
         }
-        x -= defect/derivative;
+        double correction = defect/derivative;
+        x -= correction;
         idx++;
-        #ifdef NEWTON_VERBOSE
-        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\n", idx, defect);
-        #endif
         if(idx>=max_iter){
             break;
         }
+        defect = func(x);
+        #ifdef NEWTON_VERBOSE
+        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
+               idx, defect, x, correction);
+        #endif
     }
     if(iter_made!=NULL) *iter_made = idx;
     return x;
@@ -47,15 +53,18 @@ double pure_anal_newton_1D(double (*func)(double), const double x0, const double
     double x = x0;
     double defect = func(x);
     uint idx = 0;
-    while(abs(defect)>precision){
-        x -= defect/deriv(x);
+    while(fabs(defect)>precision){
+        double correction = defect/deriv(x);
+        x -= correction;
         idx++;
-        #ifdef NEWTON_VERBOSE
-        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\n", idx, defect);
-        #endif
         if(idx>=max_iter){
             break;
         }
+        defect = func(x);
+        #ifdef NEWTON_VERBOSE
+        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
+               idx, defect, x, correction);
+        #endif
     }
     if(iter_made!=NULL) *iter_made = idx;
     return x;
@@ -72,7 +81,7 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
     double x = x0;
     double defect = func(x);
     uint idx = 0;
-    while(abs(defect)>precision){
+    while(fabs(defect)>precision){
         double derivative = 0;
         switch (der_type) {
         case LEFT_DERIVATIVE:
@@ -90,18 +99,20 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
         }
         double correction = defect/derivative;
         double new_val = x - correction;
-        while(func(new_val)>func(x)){
+        while(fabs(func(new_val))>fabs(defect)){
             correction /= 2;
-            new_val += correction;
+            new_val = x - correction;
         }
         x = new_val;
         idx++;
-        #ifdef NEWTON_VERBOSE
-        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\n", idx, defect);
-        #endif
         if(idx>=max_iter){
             break;
         }
+        defect = func(x);
+        #ifdef NEWTON_VERBOSE
+        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
+               idx, defect, x, correction);
+        #endif
     }
     if(iter_made!=NULL) *iter_made = idx;
     return x;
@@ -116,28 +127,26 @@ double modified_anal_newton_1D(double (*func)(double), const double x0, const do
     double x = x0;
     double defect = func(x);
     uint idx = 0;
-    while(abs(defect)>precision){
+    while(fabs(defect)>precision){
         double correction = defect/deriv(x);
         double new_val = x - correction;
-        while(func(new_val)>func(x)){
+        while(fabs(func(new_val))>fabs(defect)){
             correction /= 2;
-            new_val += correction;
+            new_val = x - correction;
         }
         x = new_val;
         idx++;
-        #ifdef NEWTON_VERBOSE
-        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\n", idx, defect);
-        #endif
         if(idx>=max_iter){
             break;
         }
+        defect = func(x);
+        #ifdef NEWTON_VERBOSE
+        printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
+               idx, defect, x, correction);
+        #endif
     }
     if(iter_made!=NULL) *iter_made = idx;
     return x;
 
 }
 
-//other methods: sekushchie, bisection..
-// find all roots by newton deleting other
-
-//normalized newton for systems
