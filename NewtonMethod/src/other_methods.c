@@ -61,30 +61,41 @@ double bisection(double (*func)(double), const double x_left, const double x_rig
 
 double secant_method(double (*func)(double), const double x_0, const double x_1,
                  const double precision, const uint max_iter, uint* iter_num){
+    //Convergence better than linear (~1.5)
+    //there are some initial points which cause divergence
     #ifdef VERBOSE
     printf("**** Secant method ****\n");
     #endif
     double val_0 = func(x_0);
     double val_1 = func(x_1);
     double x = (x_0*val_1 - x_1*val_0)/(val_1 - val_0);
-    double x_prev = fabs(x-x_0)>fabs(x-x_1) ? x_1 : x_0;
-    double val_prev = fabs(x-x_0)>fabs(x-x_1) ? val_1 : val_0;
+    double x_prev = x_1;
+    double val_prev = val_1;
     double val  = func(x);
     uint idx = 0;
     while(fabs(val)>precision){
-        double tmp_x = x;
-        x = (x_prev*val - x*val_prev)/(val - val_prev);
-        x_prev = tmp_x;
+        double correction = (x_prev*val - x*val_prev)/(val - val_prev) - x;
+        //while(fabs(func(x + correction))>fabs(val)) correction /=2;
+        /*double alpha = 1.0;
+        for(uint i=0; i<5; i++){
+            if(fabs(func(x + alpha*correction))>fabs(val)){
+                correction *= alpha*correction;
+                break;
+            }
+            alpha/=2;
+        }*/
+        x_prev = x;
         val_prev = val;
-        val = func(x);
+        x = x + correction;
+        val = func(x + correction);
         idx++;
         #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e \tcorrection = %.6e\n",
-                idx, val, x, x-x_prev);
+                idx, val, x, correction);
         #endif
         if(idx>=max_iter) break;
     }
     if(iter_num!=NULL) *iter_num = idx;
-    return idx;
+    return x;
 }
 

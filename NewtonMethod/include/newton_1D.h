@@ -29,4 +29,7 @@ double modified_anal_newton_1D(double (*func)(double), const double x0, const do
 double bisection(double (*func)(double), const double x_left, const double x_right,
                  const double precision, const uint max_iter, uint* iter_num);
 
+double secant_method(double (*func)(double), const double x_0, const double x_1,
+                 const double precision, const uint max_iter, uint* iter_num);
+
 #endif  //NEWTON_1D_H
