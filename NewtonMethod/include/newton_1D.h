@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+//#define VERBOSE
+
 typedef enum{
     LEFT_DERIVATIVE,
     MID_DERIVATIVE,
@@ -24,5 +26,7 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
 double modified_anal_newton_1D(double (*func)(double), const double x0, const double precision,
                        double (*deriv)(double), const uint max_iter, uint* iter_made);
 
+double bisection(double (*func)(double), const double x_left, const double x_right,
+                 const double precision, const uint max_iter, uint* iter_num);
 
 #endif  //NEWTON_1D_H
