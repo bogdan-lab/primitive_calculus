@@ -16,6 +16,11 @@ double simple_func_2(const double x){
     //x1 = -1.841405660; x2 = 1.146193221
 }
 
+double bad_func_1(const double x){
+    if(x==0.0) return 0.0;
+    return x + x*x*sin(2.0/x);
+}
+
 void bisection_test(double (*func)(double), const uint test_num,
       const double left_guess, const double right_guess, const double guess_affinity){
     for(uint i=0; i<test_num; i++){
@@ -27,7 +32,7 @@ void bisection_test(double (*func)(double), const uint test_num,
                x_left, x_right, precision, max_iter);
         uint count = 0;
         double res = bisection(func, x_left, x_right, precision, max_iter, &count);
-        printf("RES:\t root = %.9lf;\tF(root) = %.3e;\titer_num = %u\n",
+        printf("RES:\t root = %.9lf;\tF(root) = %.3e ;\titer_num = %u\n",
                res, func(res), count);
     }
 }
@@ -42,6 +47,10 @@ int main(){
     left_guess = -3.0;
     righ_guess = -0.5;
     guess_affinity = 1.0;
-    bisection_test(simple_func_2, test_num, left_guess, righ_guess, guess_affinity);
+    //bisection_test(simple_func_2, test_num, left_guess, righ_guess, guess_affinity);
+    left_guess = -5;
+    righ_guess = 5;
+    guess_affinity = 2;
+    bisection_test(bad_func_1, test_num, left_guess, righ_guess, guess_affinity);
     return 0;
 }
