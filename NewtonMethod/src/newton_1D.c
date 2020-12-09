@@ -3,8 +3,6 @@
 #include <math.h>
 #include "newton_1D.h"
 
-//#define VERBOSE
-
 double get_derivative(double (*func)(), const double x0, const double delta,
                       const DerivType der_type){
     switch (der_type) {
