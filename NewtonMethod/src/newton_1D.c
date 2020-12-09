@@ -3,32 +3,33 @@
 #include <math.h>
 #include "newton_1D.h"
 
-//#define NEWTON_VERBOSE
+//#define VERBOSE
+
+double get_derivative(double (*func)(), const double x0, const double delta,
+                      const DerivType der_type){
+    switch (der_type) {
+    case LEFT_DERIVATIVE:
+        return (func(x0) - func(x0-delta))/delta;
+    case RIGHT_DERIVATIVE:
+        return (func(x0 + delta)-func(x0))/delta;
+    case MID_DERIVATIVE:;
+        return (func(x0 + delta) - func(x0 - delta))/(2*delta);
+    default:
+        fprintf(stderr, "Incorrect derivative type flag\n");
+        exit(EXIT_FAILURE);
+    }
+}
 
 double pure_calc_newton_1D(double (*func)(double), const double x0, const double precision,
    const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made){
-    #ifdef NEWTON_VERBOSE
+    #ifdef VERBOSE
     printf("**** Pure Numerical Newton 1D ****\n");
     #endif
     double x = x0;
     double defect = func(x);
     uint idx = 0;
     while(fabs(defect)>precision){
-        double derivative = 0;
-        switch (der_type) {
-        case LEFT_DERIVATIVE:
-            derivative = (defect - func(x-der_delta))/der_delta;
-            break;
-        case RIGHT_DERIVATIVE:
-            derivative = (func(x+der_delta)-defect)/der_delta;
-            break;
-        case MID_DERIVATIVE:;
-            derivative = (func(x+der_delta) - func(x-der_delta))/der_delta;
-            break;
-        default:
-            fprintf(stderr, "Incorrect derivative type flag\n");
-            exit(EXIT_FAILURE);
-        }
+        double derivative = get_derivative(func, x, der_delta, der_type);
         double correction = defect/derivative;
         x -= correction;
         idx++;
@@ -36,7 +37,7 @@ double pure_calc_newton_1D(double (*func)(double), const double x0, const double
             break;
         }
         defect = func(x);
-        #ifdef NEWTON_VERBOSE
+        #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
         #endif
@@ -47,7 +48,7 @@ double pure_calc_newton_1D(double (*func)(double), const double x0, const double
 
 double pure_anal_newton_1D(double (*func)(double), const double x0, const double precision,
                        double (*deriv)(double), const uint max_iter, uint* iter_made){
-    #ifdef NEWTON_VERBOSE
+    #ifdef VERBOSE
     printf("**** Pure Analitical Newton 1D ****\n");
     #endif
     double x = x0;
@@ -61,7 +62,7 @@ double pure_anal_newton_1D(double (*func)(double), const double x0, const double
             break;
         }
         defect = func(x);
-        #ifdef NEWTON_VERBOSE
+        #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
         #endif
@@ -75,28 +76,14 @@ double pure_anal_newton_1D(double (*func)(double), const double x0, const double
 //modified newton with dividng by two
 double modified_calc_newton_1D(double (*func)(double), const double x0, const double precision,
     const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made){
-    #ifdef NEWTON_VERBOSE
+    #ifdef VERBOSE
     printf("**** Modified Numerical Newton 1D ****\n");
     #endif
     double x = x0;
     double defect = func(x);
     uint idx = 0;
     while(fabs(defect)>precision){
-        double derivative = 0;
-        switch (der_type) {
-        case LEFT_DERIVATIVE:
-            derivative = (defect - func(x-der_delta))/der_delta;
-            break;
-        case RIGHT_DERIVATIVE:
-            derivative = (func(x+der_delta)-defect)/der_delta;
-            break;
-        case MID_DERIVATIVE:;
-            derivative = (func(x+der_delta) - func(x-der_delta))/der_delta;
-            break;
-        default:
-            fprintf(stderr, "Incorrect derivative type flag\n");
-            exit(EXIT_FAILURE);
-        }
+        double derivative = get_derivative(func, x, der_delta, der_type);
         double correction = defect/derivative;
         double new_val = x - correction;
         while(fabs(func(new_val))>fabs(defect)){
@@ -109,7 +96,7 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
             break;
         }
         defect = func(x);
-        #ifdef NEWTON_VERBOSE
+        #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
         #endif
@@ -121,7 +108,7 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
 
 double modified_anal_newton_1D(double (*func)(double), const double x0, const double precision,
                        double (*deriv)(double), const uint max_iter, uint* iter_made){
-    #ifdef NEWTON_VERBOSE
+    #ifdef VERBOSE
     printf("**** Modified Analitical Newton 1D ****\n");
     #endif
     double x = x0;
@@ -140,7 +127,7 @@ double modified_anal_newton_1D(double (*func)(double), const double x0, const do
             break;
         }
         defect = func(x);
-        #ifdef NEWTON_VERBOSE
+        #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
         #endif

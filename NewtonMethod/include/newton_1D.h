@@ -9,6 +9,9 @@ typedef enum{
     RIGHT_DERIVATIVE
 } DerivType;
 
+double get_derivative(double (*func)(), const double x0, const double delta,
+                      const DerivType der_type);
+
 double pure_calc_newton_1D(double (*func)(double), const double x0, const double precision,
     const DerivType der_type, const double der_delta, const uint max_iter, uint* iter_made);
 
