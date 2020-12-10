@@ -74,8 +74,9 @@ int main(){
     }
     {
     //SECANT METHOD
-    //secant_test(simple_func_1, 100, 0.0, 1.0, 0.5*M_PI);
-    secant_test(simple_func_2, 1000, 0.0, 3.0, 1);
+    //secant_test(simple_func_1, 1000, 0.0, 1.0, 0.5*M_PI);
+    secant_test(simple_func_2, 1000, 0.0, 10.0, 1);
+    //secant_test(bad_func_1, 1000, -10.0, 10.0, 5.0);
     }
     return 0;
 }
