@@ -40,6 +40,8 @@ void bisection_test(double (*func)(double), const uint test_num,
 
 void secant_test(double (*func)(double), const uint test_num,
       const double left_guess, const double right_guess, const double guess_affinity){
+    uint count_bad_basic = 0;
+    uint count_bad_modified = 0;
     for(uint i=0; i<test_num; i++){
         double x_0 = left_guess+ (2.0*rand()/RAND_MAX -1.0)*guess_affinity;
         double x_1 = right_guess+ (2.0*rand()/RAND_MAX -1.0)*guess_affinity;
@@ -49,9 +51,17 @@ void secant_test(double (*func)(double), const uint test_num,
                x_0, x_1, precision, max_iter);
         uint count = 0;
         double res = secant_method(func, x_0, x_1, precision, max_iter, &count);
-        printf("RES:\t root = %.9lf;\tF(root) = %.3e ;\titer_num = %u\n",
+        printf("BASIC:\t root = %.9lf;\tF(root) = %.6e ;\titer_num = %u\n",
                res, func(res), count);
+        if(count==max_iter) count_bad_basic++;
+        uint mod_count = 0;
+        double mod_res = modified_secant_method(func, x_0, x_1, precision, max_iter, &mod_count);
+        printf("MODIFIED:\t root = %.9lf;\tF(root) = %.6e ;\titer_num = %u\n",
+               mod_res, func(mod_res), mod_count);
+        if(mod_count==max_iter) count_bad_modified++;
     }
+    printf("Number of bad tests:\nBasic = %u;\n Modified = %u\n",
+           count_bad_basic, count_bad_modified);
 }
 
 
@@ -65,7 +75,7 @@ int main(){
     {
     //SECANT METHOD
     //secant_test(simple_func_1, 100, 0.0, 1.0, 0.5*M_PI);
-    secant_test(simple_func_2, 1000, 0.0, 10.0, 1);
+    secant_test(simple_func_2, 1000, 0.0, 3.0, 1);
     }
     return 0;
 }
