@@ -22,3 +22,10 @@ target_link_libraries(secant_test PRIVATE newton_method)
 
 add_test(NAME SecantTest
         COMMAND secant_test)
+
+add_executable(third_order_test
+        test_third_order.c)
+target_link_libraries(third_order_test PRIVATE newton_method)
+
+add_test(NAME ThirdOrderTest
+        COMMAND third_order_test)

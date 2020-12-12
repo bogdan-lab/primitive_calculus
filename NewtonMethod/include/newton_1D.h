@@ -2,6 +2,8 @@
 #define NEWTON_1D_H
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 //#define VERBOSE
 
