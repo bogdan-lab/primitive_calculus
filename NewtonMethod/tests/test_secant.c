@@ -21,22 +21,6 @@ double bad_func_1(const double x){
     return x + x*x*sin(2.0/x);
 }
 
-void bisection_test(double (*func)(double), const uint test_num,
-      const double left_guess, const double right_guess, const double guess_affinity){
-    for(uint i=0; i<test_num; i++){
-        double x_left = left_guess+ (2.0*rand()/RAND_MAX -1.0)*guess_affinity;
-        double x_right = right_guess+ (2.0*rand()/RAND_MAX -1.0)*guess_affinity;
-        double precision = 1e-9;
-        uint max_iter = 100;
-        printf("TASK: x_l = %.6e\tx_r = %.6e\terror = %.6e\tmax_iter = %u\n",
-               x_left, x_right, precision, max_iter);
-        uint count = 0;
-        double res = bisection(func, x_left, x_right, precision, max_iter, &count);
-        printf("RES:\t root = %.9lf;\tF(root) = %.3e ;\titer_num = %u\n",
-               res, func(res), count);
-    }
-}
-
 
 void secant_test(double (*func)(double), const uint test_num,
       const double left_guess, const double right_guess, const double guess_affinity){
@@ -66,17 +50,9 @@ void secant_test(double (*func)(double), const uint test_num,
 
 
 int main(){
-    {
-    //BISECTION
-    //bisection_test(simple_func_1, 100, 0.0, M_PI, 0.5*M_PI);
-    //bisection_test(simple_func_2, 100, -3.0, -0.5, 1.0);
-    //bisection_test(bad_func_1, 100, -5, 5, 2);
-    }
-    {
     //SECANT METHOD
     //secant_test(simple_func_1, 1000, 0.0, 1.0, 0.5*M_PI);
     secant_test(simple_func_2, 1000, 0.0, 10.0, 1);
     //secant_test(bad_func_1, 1000, -10.0, 10.0, 5.0);
-    }
     return 0;
 }

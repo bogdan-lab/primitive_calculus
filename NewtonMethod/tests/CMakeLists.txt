@@ -5,14 +5,20 @@ add_executable(test_newton_1D
 
 target_link_libraries(test_newton_1D PRIVATE newton_method)
 
-add_test(
-	NAME TestNewton1D
+add_test(NAME TestNewton1D
 	COMMAND test_newton_1D)
 
-add_executable(test_other_methods
-                test_other_methods.c)
+add_executable(bisection_test
+                test_bisection.c)
 
-target_link_libraries(test_other_methods PRIVATE newton_method)
+target_link_libraries(bisection_test PRIVATE newton_method)
 
-add_test(NAME TestOtherMethods
-        COMMAND test_other_methods)
+add_test(NAME BisectionTest
+        COMMAND bisection_test)
+
+add_executable(secant_test
+                test_secant.c)
+target_link_libraries(secant_test PRIVATE newton_method)
+
+add_test(NAME SecantTest
+        COMMAND secant_test)
