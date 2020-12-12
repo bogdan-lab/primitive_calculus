@@ -82,18 +82,18 @@ double modified_calc_newton_1D(double (*func)(double), const double x0, const do
     uint idx = 0;
     while(fabs(defect)>precision){
         double derivative = get_derivative(func, x, der_delta, der_type);
-        double correction = defect/derivative;
-        double new_val = x - correction;
-        while(fabs(func(new_val))>fabs(defect)){
+        double correction = -defect/derivative;
+        double new_val = func(x + correction);
+        while(fabs(new_val)>fabs(defect)){
             correction /= 2;
-            new_val = x - correction;
+            new_val = func(x+correction);
         }
-        x = new_val;
+        x += correction;
         idx++;
         if(idx>=max_iter){
             break;
         }
-        defect = func(x);
+        defect = new_val;
         #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
@@ -113,18 +113,18 @@ double modified_anal_newton_1D(double (*func)(double), const double x0, const do
     double defect = func(x);
     uint idx = 0;
     while(fabs(defect)>precision){
-        double correction = defect/deriv(x);
-        double new_val = x - correction;
+        double correction = -defect/deriv(x);
+        double new_val = func(x+correction);
         while(fabs(func(new_val))>fabs(defect)){
             correction /= 2;
-            new_val = x - correction;
+            new_val = func(x+correction);
         }
-        x = new_val;
+        x += correction;
         idx++;
         if(idx>=max_iter){
             break;
         }
-        defect = func(x);
+        defect = new_val;
         #ifdef VERBOSE
         printf("iteration[%u]\ndefect = %.6e\tx = %.6e\tcorrection = %.6e\n",
                idx, defect, x, correction);
