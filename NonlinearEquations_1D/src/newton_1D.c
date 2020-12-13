@@ -1,7 +1,7 @@
 ﻿#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "newton_1D.h"
+#include "nonlinear_equation_1D.h"
 
 double get_derivative(double (*func)(), const double x0, const double delta,
                       const DerivType der_type){
@@ -115,7 +115,7 @@ double modified_anal_newton_1D(double (*func)(double), const double x0, const do
     while(fabs(defect)>precision){
         double correction = -defect/deriv(x);
         double new_val = func(x+correction);
-        while(fabs(func(new_val))>fabs(defect)){
+        while(fabs(new_val)>fabs(defect)){
             correction /= 2;
             new_val = func(x+correction);
         }

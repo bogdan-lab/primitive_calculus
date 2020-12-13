@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "newton_1D.h"
+#include "nonlinear_equation_1D.h"
 
 
 

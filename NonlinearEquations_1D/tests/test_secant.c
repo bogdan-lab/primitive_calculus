@@ -3,7 +3,7 @@
 #include <math.h>
 #include <time.h>
 
-#include "newton_1D.h"
+#include "nonlinear_equation_1D.h"
 
 double simple_func_1(const double x){
     //Cannot be solved by bisection because it is never less than zero!

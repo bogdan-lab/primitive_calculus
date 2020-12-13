@@ -10,10 +10,11 @@ Secant - convergence order is between 1 and 2 (~1.5). Not that bad at all, espec
 
 Newton - second order convergence (not always!). Usual dificalies with derivative...
 
-Third order Newton - requires second derivative! It would be much better if we can calculate function derivative analytically.
+Third order Newton - requires second derivative! It would be much better if we can calculate function derivative analytically. VERY SENSITIVE FOR FUNCTIONS!
+
+
 
 TODO:
-[] Test different methods on the same different equations
 [] Try out method of deleting roots for searching all solutions
-
+[] Try that thing with normalization of the space for faster convergence in nonlinear systems (Fedorenko)
 

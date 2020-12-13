@@ -1,7 +1,7 @@
 ﻿#include <stdio.h>
 #include <math.h>
 
-#include "newton_1D.h"
+#include "nonlinear_equation_1D.h"
 
 
 double get_second_derivative(double (*func)(double), const double x,
@@ -16,7 +16,7 @@ double third_order_newton(double (*func)(double), const double x0, const double 
     //Here we have f''(x) in the numerator --> if close to the solution it become infinite we hav problem
     //ALSO IN CASE OF CALCULATIVE DERIVATIVE much more sensitive to it than classical second order newton
     #ifdef VERBOSE
-    printf("**** Third order Newton method Calculus****\n")
+    printf("**** Third order Newton method Calculus****\n");
     #endif
     double x = x0;
     double val = func(x0);
@@ -43,7 +43,7 @@ double third_order_newton_anal(double (*func)(double), const double x0,
        const uint max_iter, uint* iter_num){
     //GOOD IF ALL DERIVATIVES NEAR THE SOLUTION ARE OK!
     #ifdef VERBOSE
-    printf("**** Third order Newton method Analitical ****\n")
+    printf("**** Third order Newton method Analitical ****\n");
     #endif
     double x = x0;
     double val = func(x0);
@@ -77,7 +77,7 @@ double third_order_newton_modified(double (*func)(double), const double x0,
     //it simply is blown away from the bad position by one iteration and starts over and some
     //of those start-overs finishes with success. However such succes is ocasional and should not be relied on!
     #ifdef VERBOSE
-    printf("**** Third order Newton method Calculus modified****\n")
+    printf("**** Third order Newton method Calculus modified****\n");
     #endif
     double x = x0;
     double val = func(x0);
@@ -109,7 +109,7 @@ double third_order_newton_modified_anal(double (*func)(double), const double x0,
      const double precision, double (*deriv)(double), double (*deriv_sec)(double),
            const uint max_iter, uint* iter_num){
     #ifdef VERBOSE
-    printf("**** Third order Newton method Analytical modified****\n")
+    printf("**** Third order Newton method Analytical modified****\n");
     #endif
     double x = x0;
     double val = func(x0);

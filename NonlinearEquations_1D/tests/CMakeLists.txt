@@ -29,3 +29,10 @@ target_link_libraries(third_order_test PRIVATE newton_method)
 
 add_test(NAME ThirdOrderTest
         COMMAND third_order_test)
+
+add_executable(compare_methods
+        compare_methods.c)
+target_link_libraries(compare_methods PRIVATE newton_method)
+
+add_test(NAME CompareMethods
+        COMMAND compare_methods)
