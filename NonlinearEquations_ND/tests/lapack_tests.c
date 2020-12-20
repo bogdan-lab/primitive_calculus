@@ -4,33 +4,28 @@
 #include <math.h>
 #include <time.h>
 #include "lapacke.h"
+#include "gsl/gsl_cblas.h"
 
 
 void error_hendler(const int info);
 void inverse_square_matrix(double* matrix, const uint n);
-void matrix_vector_mult(double** solution, const double* inv_m, const double* rhs,
+void matrix_vector_mult(double** solution, const double* matrix, const double* vec,
                    const uint n);
 void randomly_fill_array(double** arr, const uint size);
 void check_solution(const double* solution, const double* lhs, const double* rhs,
                     const uint eq_num, const double defect);
-
+void compare_vectors(const double* lhs, const double* rhs, const uint count,
+                     const double delta);
 void my_inverse_2x2(double** result, const double* input);
 
+void check_matrix_inversion(const uint eq_num, const double delta);
+void check_matrix_multiplication(const uint v_size, const double delta);
+
 int main(){
-    srand((uint)time(NULL));
-    const double delta = 1e-10;
-    const uint eq_num = 10;
-    const uint matrix_size = eq_num*eq_num;
-    double* rhs;
-    double* lhs;
-    randomly_fill_array(&rhs, eq_num);
-    randomly_fill_array(&lhs, matrix_size);
-    double* lhs_inv = calloc(matrix_size, sizeof(*lhs_inv));
-    memcpy(lhs_inv, lhs, matrix_size*sizeof(double));
-    inverse_square_matrix(lhs_inv, eq_num);
-    double* solution;
-    matrix_vector_mult(&solution, lhs_inv, rhs, eq_num);
-    check_solution(solution, lhs, rhs, eq_num, delta);
+    //srand((uint)time(NULL));
+    srand(42u);
+    //check_matrix_inversion(10, 1e-10);
+    check_matrix_multiplication(10, 1e-15);
     return 0;
 }
 
@@ -77,8 +72,13 @@ void check_solution(const double* solution, const double* lhs, const double* rhs
                     const uint eq_num, const double delta){
     double* res;
     matrix_vector_mult(&res, lhs, solution, eq_num);
-    for(uint i=0; i<eq_num; i++){
-        double defect = fabs(rhs[i] - res[i]);
+    compare_vectors(res, rhs, eq_num, delta);
+}
+
+void compare_vectors(const double* lhs, const double* rhs, const uint count,
+                     const double delta){
+    for(uint i=0; i<count; i++){
+        double defect = fabs(lhs[i] - rhs[i]);
         if(defect>delta){
             fprintf(stderr, "Row %i has incorrect result : defect = %.6e\n", i, defect);
             exit(EXIT_FAILURE);
@@ -86,6 +86,7 @@ void check_solution(const double* solution, const double* lhs, const double* rhs
     }
     printf("Check was succesfull!\n");
 }
+
 
 void my_inverse_2x2(double** result, const double* input){
     double det = input[0]*input[3]-input[1]*input[2];
@@ -95,4 +96,30 @@ void my_inverse_2x2(double** result, const double* input){
     tmp[2] = -input[2]/det;
     tmp[3] = input[0]/det;
     *result = tmp;
+}
+
+void check_matrix_inversion(const uint eq_num, const double delta){
+    const uint matrix_size = eq_num*eq_num;
+    double* rhs;
+    double* lhs;
+    randomly_fill_array(&rhs, eq_num);
+    randomly_fill_array(&lhs, matrix_size);
+    double* lhs_inv = calloc(matrix_size, sizeof(*lhs_inv));
+    memcpy(lhs_inv, lhs, matrix_size*sizeof(double));
+    inverse_square_matrix(lhs_inv, eq_num);
+    double* solution;
+    matrix_vector_mult(&solution, lhs_inv, rhs, eq_num);
+    check_solution(solution, lhs, rhs, eq_num, delta);
+}
+
+void check_matrix_multiplication(const uint v_size, const double delta){
+    double* vec;
+    randomly_fill_array(&vec, v_size);
+    double* m;
+    randomly_fill_array(&m, v_size*v_size);
+    double* my_res;
+    matrix_vector_mult(&my_res, m, vec, v_size);
+    double cblas_res[v_size];
+    cblas_dgemv(CblasRowMajor, CblasNoTrans, v_size, v_size, 1.0, m, v_size, vec, 1, 0.0, cblas_res, 1);
+    compare_vectors(my_res, cblas_res, v_size, delta);
 }
