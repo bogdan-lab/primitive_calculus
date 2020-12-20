@@ -6,10 +6,10 @@
 
 #include "nonlinear_equations.h"
 
-double get_derivative_val(function_t func, const uint pos, const double* point,
+double get_derivative_val(const function_t func, const uint pos, const double* point,
                           const uint count, const double der_delta){
-    double* lhs_point = calloc(count, sizeof(*lhs_point));
-    double* rhs_point = calloc(count, sizeof(*lhs_point));
+    double lhs_point[count];
+    double rhs_point[count];
     memcpy(lhs_point, point, count*sizeof(double));
     memcpy(rhs_point, point, count*sizeof(double));
     lhs_point[pos] += der_delta;
@@ -17,7 +17,7 @@ double get_derivative_val(function_t func, const uint pos, const double* point,
     return (func(lhs_point, count) - func(rhs_point, count))/(2*der_delta);
 }
 
-void fill_derivative_matrix(function_t* system, const double* point, const uint count,
+void fill_derivative_matrix(const function_t* system, const double* point, const uint count,
                             const double der_delta, double* der_matrix){
     const uint m_size = count*count;
     for(uint i=0; i<m_size; i++){
@@ -28,7 +28,7 @@ void fill_derivative_matrix(function_t* system, const double* point, const uint 
     }
 }
 
-int check_solution(function_t* system, const double* solution, const uint count,
+int check_solution(const function_t* system, const double* solution, const uint count,
                    const double precision){
     double sum = 0;
     for(uint i=0; i<count ; i++){
@@ -37,7 +37,7 @@ int check_solution(function_t* system, const double* solution, const uint count,
     return sum<precision;
 }
 
-void fill_func_val(function_t* system, const double* point, const uint count,
+void fill_func_val(const function_t* system, const double* point, const uint count,
                    double* val_vec){
     for(uint i=0; i<count; i++){
         val_vec[i] = system[i](point, count);
@@ -52,29 +52,80 @@ void inverse_square_matrix(double* matrix, const uint n){
     error_hendler(info);
 }
 
-void newton_method(double* solution, function_t* system, const uint count,
+void print_result(const double* solution, const function_t* system, const uint count){
+    printf("SOLUTION = ");
+    for(uint i=0; i<count; i++){
+        printf("%.6e ; ", solution[i]);
+    }
+    printf("\nSYSTEM VALUE = ");
+    for(uint i=0; i<count; i++){
+        printf("%.6e ; ", system[i](solution, count));
+    }
+    printf("\n");
+}
+
+void newton_method(double* solution,const function_t* system, const uint count,
                     const double precision, const double der_delta,
                    const uint max_iter, uint* iter_num){
     uint iter = 0;
-    while(!check_solution(system, solution, count, precision)){
+    double rhs[count];
+    fill_func_val(system, solution, count, rhs);
+    double defect = cblas_dnrm2(count, rhs, 1);
+    while(defect>precision){
+        double defect_prev_step = defect;
         double der_matrix[count*count];
         fill_derivative_matrix(system, solution, count, der_delta, der_matrix);
         inverse_square_matrix(der_matrix, count);
-        double rhs[count];
-        fill_func_val(system, solution, count, rhs);
         double delta_x[count];
         cblas_dgemv(CblasRowMajor, CblasNoTrans, count, count, -1.0, der_matrix,
                     count, rhs, 1, 0.0, delta_x, 1);
-        cblas_daxpy(count, 1.0, delta_x, 1, solution, 1);
+        double alpha = 2.0;
+        double tmp_solution[count];
+        do{
+            alpha /= 2;
+            memcpy(tmp_solution, solution, count*sizeof(double));
+            cblas_daxpy(count, alpha, delta_x, 1, tmp_solution, 1);
+            fill_func_val(system, tmp_solution, count, rhs);
+            defect = cblas_dnrm2(count, rhs, 1);
+        }while(defect>defect_prev_step);
+        cblas_dswap(count, solution, 1, tmp_solution, 1);
         iter++;
         if(iter>=max_iter) break;
     }
     if(iter_num!=NULL) *iter_num = iter;
 }
 
+void newton_method_classic(double* solution,const function_t* system,
+       const uint count, const double precision, const double der_delta,
+                   const uint max_iter, uint* iter_num){
+    uint iter = 0;
+    double rhs[count];
+    fill_func_val(system, solution, count, rhs);
+    double defect = cblas_dnrm2(count, rhs, 1);
+    double der_matrix[count*count];
+    while(defect>precision){
+        fill_derivative_matrix(system, solution, count, der_delta, der_matrix);
+        inverse_square_matrix(der_matrix, count);
+        double delta_x[count];
+        cblas_dgemv(CblasRowMajor, CblasNoTrans, count, count, -1.0, der_matrix,
+                    count, rhs, 1, 0.0, delta_x, 1);
+        cblas_daxpy(count, 1.0, delta_x, 1, solution, 1);
+        fill_func_val(system, solution, count, rhs);
+        defect = cblas_dnrm2(count, rhs, 1);
+        iter++;
+        if(iter>=max_iter) break;
+    }
+    if(iter_num!=NULL) *iter_num = iter;
+}
+
+
 void error_hendler(const int info){
-    if(info!=0){
-        fprintf(stderr, "Something went wrong!");
+    if(info>0){
+        fprintf(stderr, "I have exactly ZERO in %i position\n", info);
+        exit(EXIT_FAILURE);
+    }
+    else if(info<0){
+        fprintf(stderr, "The %i-th argument has illegal value\n", -info);
         exit(EXIT_FAILURE);
     }
 }
