@@ -12,9 +12,10 @@ Newton - second order convergence (not always!). Usual dificalies with derivativ
 
 Third order Newton - requires second derivative! It would be much better if we can calculate function derivative analytically. VERY SENSITIVE FOR FUNCTIONS!
 
+It looks like one should solve the problem with optimization method step more carefully in case of ND newton method - simple division by two now frequently does not work.
 
+The thing with convergence according to normalized defect looks like something rather particular, than general. However this result may be influenced by changes in algorithm of chosing optimal step!
 
 TODO:
 [] Try out method of deleting roots for searching all solutions
-[] Try that thing with normalization of the space for faster convergence in nonlinear systems (Fedorenko)
 

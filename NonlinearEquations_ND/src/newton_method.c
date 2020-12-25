@@ -79,21 +79,83 @@ void newton_method(double* solution,const function_t* system, const uint count,
         double delta_x[count];
         cblas_dgemv(CblasRowMajor, CblasNoTrans, count, count, -1.0, der_matrix,
                     count, rhs, 1, 0.0, delta_x, 1);
-        double alpha = 2.0;
+        double alpha = 1.0;
         double tmp_solution[count];
+        uint internal_iter = 0;
         do{
-            alpha /= 2;
+            alpha -= 1e-2;
             memcpy(tmp_solution, solution, count*sizeof(double));
             cblas_daxpy(count, alpha, delta_x, 1, tmp_solution, 1);
             fill_func_val(system, tmp_solution, count, rhs);
             defect = cblas_dnrm2(count, rhs, 1);
-        }while(defect>defect_prev_step);
+            internal_iter++;
+        }while(defect>defect_prev_step && alpha>1e-2);
         cblas_dswap(count, solution, 1, tmp_solution, 1);
         iter++;
         if(iter>=max_iter) break;
     }
     if(iter_num!=NULL) *iter_num = iter;
 }
+
+
+void fill_norm_column(double* norm_column, const double* der_matrix, const uint count){
+    for(uint i=0; i<count; i++){
+        norm_column[i] = cblas_dnrm2(count, der_matrix+i*count, 1);
+    }
+}
+
+
+void normalize_vector(double* vec, const double* norm_column, const uint count){
+    for(uint i=0; i<count; i++){
+        vec[i] /= norm_column[i];
+    }
+}
+
+double calculate_normalized_defect(const double* rhs, const double* der_matrix, const uint count){
+    double norm_column[count];
+    fill_norm_column(norm_column, der_matrix, count);
+    double tmp_rhs[count];
+    memcpy(tmp_rhs, rhs, count*sizeof(double));
+    normalize_vector(tmp_rhs, norm_column, count);
+    double defect = cblas_dnrm2(count, tmp_rhs, 1);
+    return defect;
+}
+
+void newton_method_normalized(double* solution,const function_t* system, const uint count,
+                    const double precision, const double der_delta,
+                   const uint max_iter, uint* iter_num){
+    uint iter = 0;
+    double rhs[count];
+    fill_func_val(system, solution, count, rhs);
+    double general_defect = cblas_dnrm2(count, rhs, 1);
+    double der_matrix[count*count];
+    double delta_x[count];
+    double tmp_solution[count];
+    while(general_defect>precision){
+        fill_derivative_matrix(system, solution, count, der_delta, der_matrix);
+        double cur_norm_defect = calculate_normalized_defect(rhs, der_matrix, count);
+        inverse_square_matrix(der_matrix, count);
+        cblas_dgemv(CblasRowMajor, CblasNoTrans, count, count, -1.0, der_matrix,
+                    count, rhs, 1, 0.0, delta_x, 1);
+        double alpha = 1.0;
+        double next_norm_defect = 0;//updated later
+        do{
+            alpha -= 1e-2;
+            memcpy(tmp_solution, solution, count*sizeof(double));
+            cblas_daxpy(count, alpha, delta_x, 1, tmp_solution, 1);
+            fill_func_val(system, tmp_solution, count, rhs);
+            fill_derivative_matrix(system, tmp_solution, count, der_delta, der_matrix);
+            next_norm_defect = calculate_normalized_defect(rhs, der_matrix, count);
+        }while(next_norm_defect>cur_norm_defect && alpha>1e-2);
+        cblas_dswap(count, solution, 1, tmp_solution, 1);
+        general_defect = cblas_dnrm2(count, rhs, 1);
+        iter++;
+        if(iter>=max_iter) break;
+    }
+    if(iter_num!=NULL) *iter_num = iter;
+}
+
+
 
 void newton_method_classic(double* solution,const function_t* system,
        const uint count, const double precision, const double der_delta,
