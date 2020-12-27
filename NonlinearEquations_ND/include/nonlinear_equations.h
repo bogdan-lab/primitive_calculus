@@ -39,3 +39,9 @@ void normalize_vector(double* vec, const double* norm_column, const uint count);
 void fill_norm_column(double* norm_column, const double* der_matrix, const uint count);
 
 double calculate_normalized_defect(const double* rhs, const double* der_matrix, const uint count);
+
+double find_min_parameter(const double l_bnd, const double r_bnd, const double* delta,
+                          const double* ini_vec, const function_t* system,
+                          const uint count, const double param_precision);
+void calc_shifted_value(const double shift, const double* delta,
+                        const double* ini_vec, double* shifted_val, const uint count);
