@@ -1,4 +1,5 @@
 **/build
 **/*.user
 **/*.swp
-
+**/program_runs
+**/scripts/*.txt
