@@ -51,7 +51,7 @@ void legandre_combination(double* res_arr, const uint comb_num, const double x){
             res_arr[i] = x;
             continue;
         }
-        res_arr[i] = 2.0*i/(i+1)*x*res_arr[i-1] - 1.0*i/(i+1)*res_arr[i-2];
+        res_arr[i] = 2.0*(i-1)/i*x*res_arr[i-1] - 1.0*(i-1)/i*res_arr[i-2];
     }
 }
 
@@ -66,6 +66,22 @@ void regularize_rhs_vector(double* res_arr, const uint comb_num, const uint coun
                            const double* lhs_A, const double* rhs){
     cblas_dgemv(CblasRowMajor, CblasTrans, count_x, comb_num, 1.0, lhs_A, comb_num,
                 rhs, 1, 0.0, res_arr, 1);
+}
+
+void solve_equation(double* x, const double* A, const double* b, const uint count){
+    double matrix[count*count];
+    memcpy(matrix, A, count*count*sizeof(double));
+    inverse_square_matrix(matrix, count);
+    cblas_dgemv(CblasRowMajor, CblasNoTrans, count, count, 1.0, matrix, count,
+                b, 1, 0.0, x, 1);
+}
+
+void inverse_square_matrix(double* matrix, const uint n){
+    int ipiv[n];
+    int info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, matrix, n, ipiv);
+    error_hendler(info);
+    info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, matrix, n, ipiv);
+    error_hendler(info);
 }
 
 void check_for_diagonal_max(const double* arr, const uint count){
@@ -93,5 +109,25 @@ void print_matrix(const double* arr, const uint rc, const uint cc){
         printf("  %.4e  ", arr[i]);
     }
     printf("\n");
+}
+
+void error_hendler(const int info){
+    if(info!=0){
+        fprintf(stderr, "Something went wrong!");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+void save_weight_to_file(const char* filename, const double* weights, const uint count){
+    FILE* fout = fopen(filename, "w");
+    if(!fout){
+        fprintf(stderr, "Cannot open file %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    for(uint i=0; i<count; i++){
+        fprintf(fout, "%.6e\n", weights[i]);
+    }
+    fclose(fout);
 }
 
